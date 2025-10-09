@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 3000;
 let accessToken = process.env.ACCESS_TOKEN;
 let refreshToken = process.env.REFRESH_TOKEN;
 
-// 1️⃣ Endpoint raíz amigable
+// 1️⃣ Endpoint raíz
 app.get("/", (req, res) => {
   res.send("Servidor Dexcom funcionando. Usa /auth para autorizar y /glucosa para leer glucosa.");
 });
@@ -40,11 +40,18 @@ app.get("/callback", async (req, res) => {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body
     });
+
     const data = await response.json();
+
+    // 🔍 Log completo para revisar tokens
+    console.log("Respuesta Dexcom token:", data);
+
     accessToken = data.access_token;
     refreshToken = data.refresh_token;
+
     res.send("Autorización exitosa! Puedes cerrar esta página.");
   } catch (err) {
+    console.error(err);
     res.status(500).send(err.toString());
   }
 });
@@ -54,12 +61,15 @@ app.get("/glucosa", async (req, res) => {
   if (!accessToken) return res.status(400).json({ error: "No access token. Autoriza primero en /auth" });
 
   try {
+    console.log("Usando accessToken:", accessToken);
+
     const response = await fetch("https://sandbox-api.dexcom.com/v2/users/self/egvs", {
       headers: { Authorization: `Bearer ${accessToken}` }
     });
+
     const data = await response.json();
 
-    // Verificar que existan lecturas
+    // Validar que existan lecturas
     if (!data.egvs || data.egvs.length === 0) {
       return res.json({ value: null, message: "No hay lecturas disponibles" });
     }
@@ -67,12 +77,12 @@ app.get("/glucosa", async (req, res) => {
     const valor = data.egvs[0].value;
     res.json({ value: valor });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: err.toString() });
   }
 });
 
-// Arrancar servidor
+// 5️⃣ Arrancar servidor
 app.listen(PORT, () => {
   console.log(`Servidor Dexcom corriendo en puerto ${PORT}`);
 });
-
