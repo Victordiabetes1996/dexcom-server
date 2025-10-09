@@ -8,6 +8,8 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.use(cors());
+
 // 🔹 Habilitar CORS (permite peticiones desde tu frontend o smartwatch)
 app.use(
   cors({
