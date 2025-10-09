@@ -58,6 +58,12 @@ app.get("/glucosa", async (req, res) => {
       headers: { Authorization: `Bearer ${accessToken}` }
     });
     const data = await response.json();
+
+    // Verificar que existan lecturas
+    if (!data.egvs || data.egvs.length === 0) {
+      return res.json({ value: null, message: "No hay lecturas disponibles" });
+    }
+
     const valor = data.egvs[0].value;
     res.json({ value: valor });
   } catch (err) {
