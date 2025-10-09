@@ -1,32 +1,26 @@
 import express from "express";
 import fetch from "node-fetch";
-import cors from "cors";
 import dotenv from "dotenv";
+import cors from "cors";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// 🔹 Habilitar CORS para todas las rutas
 app.use(cors());
-
-// 🔹 Habilitar CORS (permite peticiones desde tu frontend o smartwatch)
-app.use(
-  cors({
-    origin: "*", // o reemplaza por tu dominio si quieres más seguridad
-    methods: ["GET", "POST"],
-  })
-);
+app.options("*", cors()); // Permite OPTIONS automáticamente
 
 let accessToken = process.env.ACCESS_TOKEN;
 let refreshToken = process.env.REFRESH_TOKEN;
 
 // 1️⃣ Endpoint raíz: estado del servidor
 app.get("/", (req, res) => {
-  res.send("✅ Servidor Dexcom funcionando. Usa /auth para autorizar y /glucosa para leer glucosa.");
+  res.send("✅ Servidor Dexcom funcionando. Usa /glucosa-mock para obtener glucosa simulada.");
 });
 
-// 2️⃣ Endpoint para iniciar autenticación OAuth de Dexcom (sandbox)
+// 2️⃣ Endpoint para iniciar autenticación OAuth Dexcom (sandbox)
 app.get("/auth", (req, res) => {
   const url = `https://sandbox-api.dexcom.com/v2/oauth2/login?client_id=${process.env.CLIENT_ID}&redirect_uri=${process.env.REDIRECT_URI}&response_type=code&scope=offline_access read:glucose`;
   res.redirect(url);
@@ -94,7 +88,7 @@ app.get("/glucosa", async (req, res) => {
 // 5️⃣ Mock temporal para pruebas sin Dexcom real
 app.get("/glucosa-mock", (req, res) => {
   const mock = {
-    value: Math.floor(Math.random() * 40) + 80, // valor aleatorio entre 80–120
+    value: Math.floor(Math.random() * 40) + 80, // valor aleatorio entre 80 y 120
     timestamp: new Date().toISOString(),
   };
   res.json(mock);
@@ -102,5 +96,5 @@ app.get("/glucosa-mock", (req, res) => {
 
 // 🚀 Arranque del servidor
 app.listen(PORT, () => {
-  console.log(`✅ Servidor corriendo en puerto ${PORT}`);
+  console.log(`✅ Servidor Dexcom corriendo en puerto ${PORT}`);
 });
