@@ -1,10 +1,14 @@
 import express from "express";
 import dotenv from "dotenv";
+import cors from "cors";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// 🔥 Habilitar CORS (para que Tizen pueda hacer fetch desde otro origen)
+app.use(cors());
 
 // Endpoint raíz
 app.get("/", (req, res) => {
